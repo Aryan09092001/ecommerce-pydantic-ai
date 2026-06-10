@@ -1,1 +1,1 @@
-### E-Commerce Pydqantic-AI
+### E-Commerce Pydantic-AI
