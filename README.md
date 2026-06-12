@@ -85,32 +85,55 @@ Instead of clicking through menus and price sliders, a customer can simply type:
 
 ## 📐 Architecture
 
+```mermaid
+flowchart LR
+    subgraph FE["🖥️ Frontend — Vanilla JS SPA"]
+        Home["Home"]
+        PD["Product Detail"]
+        CartPage["Cart"]
+        Admin["Admin Dashboard"]
+        ChatWidget["Chatbot Widget"]
+    end
+
+    subgraph BE["⚙️ Backend — FastAPI"]
+        Products["products router"]
+        CartR["cart router"]
+        Orders["orders router"]
+        Chatbot["chatbot router"]
+        Static["Static file serving<br/>(images + SPA)"]
+    end
+
+    subgraph AI["🤖 AI Services"]
+        Agent["Pydantic AI Agent"]
+        Groq["Groq LLM<br/>(qwen3-32b)"]
+    end
+
+    subgraph DB["🗄️ MongoDB Atlas"]
+        PCol[("products")]
+        CCol[("cart")]
+        OCol[("orders")]
+        UCol[("users")]
+    end
+
+    Home -->|REST / JSON| Products
+    PD --> Products
+    CartPage --> CartR
+    Admin --> Products
+    ChatWidget -->|user query| Chatbot
+
+    Products -->|CRUD + filter| PCol
+    CartR -->|manage cart| CCol
+    Orders -->|place order| OCol
+
+    Chatbot --> Agent
+    Agent -->|tool call| Groq
+    Agent -->|search_products tool| PCol
+
+    Static -->|serve images & SPA| FE
+    BE -.->|auto-instrumented traces| Logfire["📊 Pydantic Logfire"]
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Frontend (SPA)                         │
-│   Vanilla JS · router · pages · components · API client   │
-└───────────────────────────┬─────────────────────────────┘
-                            │  HTTP / JSON
-┌───────────────────────────▼─────────────────────────────┐
-│                      FastAPI App                          │
-│  ┌──────────┐ ┌────────┐ ┌────────┐ ┌────────────────┐   │
-│  │ products │ │  cart  │ │ orders │ │    chatbot     │   │
-│  │  router  │ │ router │ │ router │ │ (Pydantic AI)  │   │
-│  └────┬─────┘ └───┬────┘ └───┬────┘ └───────┬────────┘   │
-│       │           │          │              │            │
-│       │      Pydantic v2 validation         │            │
-│       │           │          │       Groq LLM + tool     │
-└───────┼───────────┼──────────┼──────────────┼────────────┘
-        │           │          │              │
-        ▼           ▼          ▼              ▼
-┌─────────────────────────────────────────────────────────┐
-│                   MongoDB Atlas                           │
-│        products · cart · orders · users                   │
-└─────────────────────────────────────────────────────────┘
-              ▲
-              │  auto-instrumented traces
-         Pydantic Logfire (observability dashboard)
-```
+
+> ⚡ All requests and AI calls are validated with **Pydantic v2** and traced via **Logfire**.
 
 ---
 
@@ -152,18 +175,15 @@ LOGFIRE_TOKEN=your_logfire_token
 python main.py
 ```
 
-The server starts at **http://localhost:8000**
+The server starts on **port 8000**.
 
-| URL | Description |
-|-----|-------------|
-| http://localhost:8000 | Storefront (frontend) |
-| http://localhost:8000/docs | Interactive API documentation (Swagger UI) |
+| Route | Description |
+|-------|-------------|
+| `/` | Storefront (frontend) |
+| `/docs` | Interactive API documentation (Swagger UI) |
 
 ### 4. (Optional) Seed demo data
-With the server running, generate 500 demo products:
-```bash
-curl -X POST http://localhost:8000/products/bulk-generate-500
-```
+With the server running, send a `POST` request to the `/products/bulk-generate-500` endpoint to generate 500 demo products.
 
 ---
 
@@ -179,7 +199,7 @@ docker build -t luxe-ecommerce .
 docker run -p 8000:8000 --env-file .env luxe-ecommerce
 ```
 
-The app will be available at **http://localhost:8000**.
+The app will be available on **port 8000**.
 
 ---
 
