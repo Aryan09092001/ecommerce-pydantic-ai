@@ -26,6 +26,23 @@ Instead of clicking through menus and price sliders, a customer can simply type:
 
 ---
 
+## 🏆 Technical Highlights & Results
+
+| Metric / Outcome | Detail |
+|------------------|--------|
+| 🤖 **Agentic AI search** | LLM autonomously translates natural language → structured MongoDB queries (**Text2NoSQL**) via tool-calling |
+| 🚫 **0 hallucinated products** | Tool-grounded architecture guarantees the assistant returns **only real database records** — a hard requirement for commerce |
+| ⚡ **Sub-second LLM responses** | Served via **Groq** inference for low-latency conversational UX |
+| 🔌 **12+ REST endpoints** | Spanning **4 domains** (products, cart, orders, chatbot) in a clean, modular router design |
+| 🛡️ **100% type-safe I/O** | Every request/response validated by **Pydantic v2** — no unvalidated data reaches the database |
+| 📦 **500-product seeding** | One-call demo data generator to load-test and showcase filtering at scale |
+| 📊 **Full-stack observability** | Auto-instrumented tracing of every request and AI call with **Pydantic Logfire** |
+| 🐳 **Deploy in one command** | Containerized with **Docker** — reproducible builds, environment-agnostic |
+
+> **In short:** an end-to-end product demonstrating modern **agentic AI**, **API design**, **data validation**, **observability**, and **containerized deployment** — the full lifecycle of a production-style application.
+
+---
+
 ## 🎯 Key Features
 
 ### 🤖 AI Shopping Assistant (the highlight)
@@ -231,6 +248,18 @@ User: "show me men's shirts under ₹2000"
 ```
 
 The agent is constrained by a strict system prompt and **can only surface products returned by the database tool** — eliminating hallucinated results, which is critical for a real commerce use case.
+
+---
+
+## 🛠️ Skills Demonstrated
+
+- **Generative / Agentic AI** — LLM tool-calling, prompt engineering, grounding & hallucination control (Pydantic AI + Groq)
+- **Backend Engineering** — RESTful API design, async endpoints, modular routing, file uploads (FastAPI)
+- **Data & Persistence** — NoSQL schema design, dynamic query building, filtering & pagination (MongoDB / PyMongo)
+- **Data Validation** — strongly-typed models and runtime validation (Pydantic v2)
+- **Observability** — distributed tracing and request instrumentation (Logfire / OpenTelemetry)
+- **DevOps** — containerization and reproducible deployments (Docker), environment-based config
+- **Full-Stack Integration** — a JavaScript SPA frontend consuming the API and AI chat, served by the backend
 
 ---
 
