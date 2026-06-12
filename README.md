@@ -9,6 +9,7 @@
   <img alt="Pydantic AI" src="https://img.shields.io/badge/Pydantic%20AI-E92063?logo=pydantic&logoColor=white">
   <img alt="Groq" src="https://img.shields.io/badge/Groq%20LLM-F55036?logo=groq&logoColor=white">
   <img alt="Logfire" src="https://img.shields.io/badge/Logfire-Observability-E92063">
+  <img alt="Docker" src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white">
 </p>
 
 ---
@@ -46,6 +47,7 @@ Instead of clicking through menus and price sliders, a customer can simply type:
 - **Modular architecture** — routes split by domain (`products`, `cart`, `orders`, `chatbot`) via FastAPI routers
 - **Production-grade observability** with **Pydantic Logfire** (auto-instrumented FastAPI + Pydantic)
 - **Auto-generated interactive API docs** (Swagger UI) out of the box
+- **Containerized** with Docker for consistent, one-command deployment anywhere
 
 ---
 
@@ -59,6 +61,7 @@ Instead of clicking through menus and price sliders, a customer can simply type:
 | **Validation** | Pydantic v2 |
 | **Observability** | Pydantic Logfire |
 | **Frontend** | Vanilla JavaScript SPA (custom router, components, services) |
+| **Containerization** | Docker |
 | **Config** | python-dotenv |
 
 ---
@@ -147,6 +150,22 @@ curl -X POST http://localhost:8000/products/bulk-generate-500
 
 ---
 
+## 🐳 Run with Docker
+
+Prefer containers? The app ships with a `Dockerfile` — no local Python setup required.
+
+```bash
+# Build the image
+docker build -t luxe-ecommerce .
+
+# Run the container (pass your environment variables)
+docker run -p 8000:8000 --env-file .env luxe-ecommerce
+```
+
+The app will be available at **http://localhost:8000**.
+
+---
+
 ## 📡 API Reference
 
 ### Products
@@ -229,6 +248,8 @@ ecom-pydantic/
 │       ├── orders.py        # Order placement
 │       └── chatbot.py       # 🤖 Pydantic AI agent + search tool
 ├── Frontend/                # Vanilla JS SPA (router, pages, components, services)
+├── Dockerfile               # Container build definition
+├── .dockerignore
 ├── requirements.txt
 └── README.md
 ```
