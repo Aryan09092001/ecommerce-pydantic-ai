@@ -1,2 +1,4 @@
 ecpyenv
 .env
+experiments\.logfire
+.logfire
