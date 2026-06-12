@@ -1,4 +1,4 @@
-# 🛍️ LUXE — AI-Powered E-Commerce Platform
+# 🛍️ LUXE - AI-Powered E-Commerce Platform using Pydantic AI
 
 > A full-stack e-commerce store with a **conversational AI shopping assistant** that turns plain English into live database queries — built with **FastAPI**, **MongoDB**, and **Pydantic AI**.
 
@@ -16,7 +16,7 @@
 
 ## ✨ Overview
 
-**LUXE** is a complete online clothing store where customers can browse, filter, and shop products — and, most importantly, **chat with an AI assistant in natural language** to find exactly what they want.
+**LUXE** is a complete online clothing store where customers can browse, filter, and shop products — and most importantly, **chat with an AI assistant in natural language** to find exactly what they want.
 
 Instead of clicking through menus and price sliders, a customer can simply type:
 
@@ -26,12 +26,12 @@ Instead of clicking through menus and price sliders, a customer can simply type:
 
 ---
 
-## 🏆 Technical Highlights & Results
+## 🏆 Technical Highlights
 
 | Metric / Outcome | Detail |
 |------------------|--------|
 | 🤖 **Agentic AI search** | LLM autonomously translates natural language → structured MongoDB queries (**Text2NoSQL**) via tool-calling |
-| 🚫 **0 hallucinated products** | Tool-grounded architecture guarantees the assistant returns **only real database records** — a hard requirement for commerce |
+| 🚫 **0 hallucinated products** | Tool-grounded architecture guarantees the assistant returns **only real database records** |
 | ⚡ **Sub-second LLM responses** | Served via **Groq** inference for low-latency conversational UX |
 | 🔌 **12+ REST endpoints** | Spanning **4 domains** (products, cart, orders, chatbot) in a clean, modular router design |
 | 🛡️ **100% type-safe I/O** | Every request/response validated by **Pydantic v2** — no unvalidated data reaches the database |
@@ -39,7 +39,54 @@ Instead of clicking through menus and price sliders, a customer can simply type:
 | 📊 **Full-stack observability** | Auto-instrumented tracing of every request and AI call with **Pydantic Logfire** |
 | 🐳 **Deploy in one command** | Containerized with **Docker** — reproducible builds, environment-agnostic |
 
-> **In short:** an end-to-end product demonstrating modern **agentic AI**, **API design**, **data validation**, **observability**, and **containerized deployment** — the full lifecycle of a production-style application.
+---
+
+## 🏗️ System Architecture
+
+![LUXE System Architecture](system_architecture_ecommerce.png)
+
+> **How it connects:** The Vanilla JS frontend communicates with the FastAPI backend via REST API. The backend handles products (CRUD), cart management, user auth, and chatbot routing. The AI Chatbot service connects to **Groq LLM** for product suggestions in natural language, while all data — products, users, and cart — lives in **MongoDB Atlas**. Images are served directly from the backend's image server.
+
+Key data flows at a glance:
+- `Frontend` → `REST API` → `FastAPI Server` → `MongoDB` (products, cart, users)
+- `Chatbot Widget` → `user queries` → `FastAPI Chatbot` → `Groq LLM` → `product suggestions` → `MongoDB`
+- `Image Server` → `serve images` → `Frontend`
+
+---
+
+## 🤖 How the AI Assistant Works
+
+```
+  User types:  "show me women's dresses under ₹1500"
+       │
+       ▼
+  ┌────────────────────────────────────────────────────┐
+  │  Pydantic AI Agent  (Groq LLM — qwen3-32b)         │
+  │  Reads system prompt → understands intent           │
+  └────────────────────┬───────────────────────────────┘
+                       │  Decides to call tool
+                       ▼
+  ┌────────────────────────────────────────────────────┐
+  │  search_products(                                   │
+  │    category = "women",                              │
+  │    keyword  = "dress",                              │
+  │    max_price = 1500                                 │
+  │  )                                                  │
+  └────────────────────┬───────────────────────────────┘
+                       │  Runs real MongoDB query
+                       ▼
+  ┌────────────────────────────────────────────────────┐
+  │  MongoDB Atlas  →  returns matching products        │
+  │  (only real records — 0 hallucinations possible)    │
+  └────────────────────┬───────────────────────────────┘
+                       │
+                       ▼
+  ┌────────────────────────────────────────────────────┐
+  │  Agent replies conversationally + UI renders cards  │
+  └────────────────────────────────────────────────────┘
+```
+
+> **Why this matters:** The agent is constrained by a strict system prompt and **can only surface products returned by the database tool** — eliminating hallucinated results, which is critical for a real commerce use case.
 
 ---
 
@@ -83,60 +130,6 @@ Instead of clicking through menus and price sliders, a customer can simply type:
 
 ---
 
-## 📐 Architecture
-
-```mermaid
-flowchart LR
-    subgraph FE["🖥️ Frontend — Vanilla JS SPA"]
-        Home["Home"]
-        PD["Product Detail"]
-        CartPage["Cart"]
-        Admin["Admin Dashboard"]
-        ChatWidget["Chatbot Widget"]
-    end
-
-    subgraph BE["⚙️ Backend — FastAPI"]
-        Products["products router"]
-        CartR["cart router"]
-        Orders["orders router"]
-        Chatbot["chatbot router"]
-        Static["Static file serving<br/>(images + SPA)"]
-    end
-
-    subgraph AI["🤖 AI Services"]
-        Agent["Pydantic AI Agent"]
-        Groq["Groq LLM<br/>(qwen3-32b)"]
-    end
-
-    subgraph DB["🗄️ MongoDB Atlas"]
-        PCol[("products")]
-        CCol[("cart")]
-        OCol[("orders")]
-        UCol[("users")]
-    end
-
-    Home -->|REST / JSON| Products
-    PD --> Products
-    CartPage --> CartR
-    Admin --> Products
-    ChatWidget -->|user query| Chatbot
-
-    Products -->|CRUD + filter| PCol
-    CartR -->|manage cart| CCol
-    Orders -->|place order| OCol
-
-    Chatbot --> Agent
-    Agent -->|tool call| Groq
-    Agent -->|search_products tool| PCol
-
-    Static -->|serve images & SPA| FE
-    BE -.->|auto-instrumented traces| Logfire["📊 Pydantic Logfire"]
-```
-
-> ⚡ All requests and AI calls are validated with **Pydantic v2** and traced via **Logfire**.
-
----
-
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -168,7 +161,7 @@ GROQ_API_KEY=your_groq_api_key
 LOGFIRE_TOKEN=your_logfire_token
 ```
 
-> 💡 In **MongoDB Atlas → Network Access**, add your IP (or `0.0.0.0/0` for local testing) so the app can connect.
+> 💡 In **MongoDB Atlas → Network Access**, add your IP (or `0.0.0.0/0` for local testing).
 
 ### 3. Run the app
 ```bash
@@ -179,27 +172,23 @@ The server starts on **port 8000**.
 
 | Route | Description |
 |-------|-------------|
-| `/` | Storefront (frontend) |
-| `/docs` | Interactive API documentation (Swagger UI) |
+| `http://localhost:8000/` | Storefront (frontend) |
+| `http://localhost:8000/docs` | Interactive API docs (Swagger UI) |
 
 ### 4. (Optional) Seed demo data
-With the server running, send a `POST` request to the `/products/bulk-generate-500` endpoint to generate 500 demo products.
+With the server running, send a `POST` request to `/products/bulk-generate-500` to generate 500 demo products.
 
 ---
 
 ## 🐳 Run with Docker
 
-Prefer containers? The app ships with a `Dockerfile` — no local Python setup required.
-
 ```bash
 # Build the image
 docker build -t luxe-ecommerce .
 
-# Run the container (pass your environment variables)
+# Run the container
 docker run -p 8000:8000 --env-file .env luxe-ecommerce
 ```
-
-The app will be available on **port 8000**.
 
 ---
 
@@ -238,66 +227,36 @@ The app will be available on **port 8000**.
 POST /chat
 { "message": "find me women's dresses under 1500" }
 ```
-**Response (products found):**
+
+**Example response:**
 ```json
 {
   "type": "products",
   "message": "Here are women's dresses under ₹1500!",
-  "data": [ { "name": "Elegant Red Dress", "price": 1299, "category": "women", "...": "..." } ]
+  "data": [
+    { "name": "Elegant Red Dress", "price": 1299, "category": "women" }
+  ]
 }
 ```
-
----
-
-## 🧠 How the AI Assistant Works
-
-```
-User: "show me men's shirts under ₹2000"
-        │
-        ▼
- Pydantic AI Agent (Groq LLM)
-        │  reads system prompt + decides intent
-        ▼
- Calls tool → search_products(category="men", keyword="shirt", max_price=2000)
-        │
-        ▼
- Tool runs a real MongoDB query  ──►  returns matching products
-        │
-        ▼
- Agent replies conversationally + endpoint returns the product list to the UI
-```
-
-The agent is constrained by a strict system prompt and **can only surface products returned by the database tool** — eliminating hallucinated results, which is critical for a real commerce use case.
-
----
-
-## 🛠️ Skills Demonstrated
-
-- **Generative / Agentic AI** — LLM tool-calling, prompt engineering, grounding & hallucination control (Pydantic AI + Groq)
-- **Backend Engineering** — RESTful API design, async endpoints, modular routing, file uploads (FastAPI)
-- **Data & Persistence** — NoSQL schema design, dynamic query building, filtering & pagination (MongoDB / PyMongo)
-- **Data Validation** — strongly-typed models and runtime validation (Pydantic v2)
-- **Observability** — distributed tracing and request instrumentation (Logfire / OpenTelemetry)
-- **DevOps** — containerization and reproducible deployments (Docker), environment-based config
-- **Full-Stack Integration** — a JavaScript SPA frontend consuming the API and AI chat, served by the backend
 
 ---
 
 ## 📂 Project Structure
 
 ```
-ecom-pydantic/
-├── main.py                  # App entry point — mounts routers, frontend, Logfire
+ecommerce-pydantic-ai/
+├── main.py                    # App entry point — mounts routers, frontend, Logfire
 ├── backend/
-│   ├── database.py          # MongoDB Atlas connection & collections
-│   ├── models.py            # Pydantic models (Product, Order, CartItem)
+│   ├── database.py            # MongoDB Atlas connection & collections
+│   ├── models.py              # Pydantic models (Product, Order, CartItem)
 │   └── routes/
-│       ├── products.py      # Product CRUD, filtering, bulk seeding
-│       ├── cart.py          # Shopping cart operations
-│       ├── orders.py        # Order placement
-│       └── chatbot.py       # 🤖 Pydantic AI agent + search tool
-├── Frontend/                # Vanilla JS SPA (router, pages, components, services)
-├── Dockerfile               # Container build definition
+│       ├── products.py        # Product CRUD, filtering, bulk seeding
+│       ├── cart.py            # Shopping cart operations
+│       ├── orders.py          # Order placement
+│       └── chatbot.py         # 🤖 Pydantic AI agent + search tool
+├── Frontend/                  # Vanilla JS SPA (router, pages, components, services)
+├── experiments/               # Jupyter notebooks for EDA & prototyping
+├── Dockerfile                 # Container build definition
 ├── .dockerignore
 ├── requirements.txt
 └── README.md
@@ -305,7 +264,20 @@ ecom-pydantic/
 
 ---
 
+## 🛠️ Skills Demonstrated
+
+- **Generative / Agentic AI** — LLM tool-calling, prompt engineering, grounding & hallucination control (Pydantic AI + Groq)
+- **Backend Engineering** — RESTful API design, async endpoints, modular routing, file uploads (FastAPI)
+- **Data & Persistence** — NoSQL schema design, dynamic query building, filtering (MongoDB / PyMongo)
+- **Data Validation** — strongly-typed models and runtime validation (Pydantic v2)
+- **Observability** — distributed tracing and request instrumentation (Logfire / OpenTelemetry)
+- **DevOps** — containerization and reproducible deployments (Docker), environment-based config
+- **Full-Stack Integration** — JavaScript SPA frontend consuming the API and AI chat
+
+---
+
 ## 🔮 Future Enhancements
+
 - User authentication & JWT-based sessions (user model & bcrypt already in place)
 - Payment gateway integration
 - Order history & tracking
